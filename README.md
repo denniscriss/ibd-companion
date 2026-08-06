@@ -38,56 +38,6 @@ or emergency-care tool.
    and descriptive review, but does not diagnose, prescribe, or replace a
    clinician's judgment.
 
-## Privacy model
-
-The SQLite database is the sole source of truth and lives outside this
-repository by default:
-
-```text
-${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}
-```
-
-Do not commit databases, attachments, exported reports, real medical records,
-or identifying health information. The included `.gitignore` blocks common
-database and private-data paths, but it is not a substitute for reviewing every
-commit.
-
-## Requirements
-
-- Python 3.10 or newer
-- SQLite support from the Python standard library
-- OpenClaw for skill-driven use; the command-line scripts also run directly
-
-No third-party Python packages are required.
-
-Repository releases (for example, `v0.1.0`) and the SQLite schema version
-(currently V6) are separate: the release identifies a published code snapshot,
-while the schema version controls safe migration of an existing private database.
-
-## Install
-
-Clone the repository into the OpenClaw workspace skills directory:
-
-```bash
-git clone https://github.com/denniscriss/ibd-companion.git \
-  ~/.openclaw/workspace/skills/ibd-companion
-```
-
-Initialize or migrate the private database:
-
-```bash
-python3 scripts/ibd_care.py init
-```
-
-The database is also created automatically on first use of either CLI if the
-configured path does not exist.
-
-To use a different database location, set `IBD_DB_PATH` for the command:
-
-```bash
-IBD_DB_PATH=/path/to/private/ibd.sqlite3 python3 scripts/ibd_care.py init
-```
-
 ## Quick start and practical use
 
 On first use, either CLI creates an empty private database if the configured
@@ -146,6 +96,56 @@ value and `qualitative` for a text result. The default unit is only a prompt:
 each recorded result keeps the unit, reference range, and abnormal flag shown
 on its source report. Existing metric definitions are never deleted; use
 `metric-deactivate --code <code>` to stop new entries while keeping history.
+
+## Privacy model
+
+The SQLite database is the sole source of truth and lives outside this
+repository by default:
+
+```text
+${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}
+```
+
+Do not commit databases, attachments, exported reports, real medical records,
+or identifying health information. The included `.gitignore` blocks common
+database and private-data paths, but it is not a substitute for reviewing every
+commit.
+
+## Requirements
+
+- Python 3.10 or newer
+- SQLite support from the Python standard library
+- OpenClaw for skill-driven use; the command-line scripts also run directly
+
+No third-party Python packages are required.
+
+Repository releases (for example, `v0.1.0`) and the SQLite schema version
+(currently V6) are separate: the release identifies a published code snapshot,
+while the schema version controls safe migration of an existing private database.
+
+## Install
+
+Clone the repository into the OpenClaw workspace skills directory:
+
+```bash
+git clone https://github.com/denniscriss/ibd-companion.git \
+  ~/.openclaw/workspace/skills/ibd-companion
+```
+
+Initialize or migrate the private database:
+
+```bash
+python3 scripts/ibd_care.py init
+```
+
+The database is also created automatically on first use of either CLI if the
+configured path does not exist.
+
+To use a different database location, set `IBD_DB_PATH` for the command:
+
+```bash
+IBD_DB_PATH=/path/to/private/ibd.sqlite3 python3 scripts/ibd_care.py init
+```
 
 ## Command overview
 

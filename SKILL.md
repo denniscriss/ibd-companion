@@ -48,11 +48,18 @@ On first use, either script creates an empty private database at that path if it
 - Use one lab checkup for one actual draw. If it serves both an injection and a large review, keep its injection link and add one `review_components(role='lab')` link. Never copy its values into a second lab row.
 - Create a review parent with `schedule-review`, then link its actual tests using `link-review-component`. Use `review-detail` to read the parent and every linked child.
 - Report values belong in `checkup_results`. Use report-provided values, units, reference bounds, and abnormal flags only. Never fill a missing range or flag from a generic threshold.
-- New databases seed only the medicine-agnostic starter metrics: CRP, ESR, HGB, WBC, PLT, and albumin. Drug-specific monitoring and any other metric must be explicitly adopted with `ibd_db.py metric-add` before a result can be recorded.
-- For a new metric, confirm its stable lowercase `snake_case` code, display name, value type (`numeric` or `qualitative`), and optional default unit. A default unit is only a prompt; preserve the actual report unit, reference range, and abnormal flag on each result. Do not change a metric's code or value type after results exist; use `metric-deactivate` instead of deletion.
+- New databases seed only the medicine-agnostic starter metrics: CRP, ESR, HGB, WBC, PLT, and albumin. Drug-specific monitoring and any other metric must be explicitly adopted before a result can be recorded.
 - Use `add-checkup-report` for endoscopy, CT, MRI/MRE, pathology, visit, or other report wording. Preserve original wording; optional findings/impression are transcriptions, not model-generated interpretations. An attachment reference must remain in private storage.
 - After a completed review, record `record-checkup-assessment` on the completed assessment-bearing visit/checkup only when the clinician's conclusion or the user's explicit confirmed transcription supports it. Link that checkup to the review using role `assessment` or `visit`.
 - A corrected conclusion creates a new assessment version and preserves the previous one. Never treat a lab result, symptom trend, or an unconfirmed report interpretation as a formal assessment.
+
+## Custom metric workflow
+
+1. When the user asks to record or track a metric, first run `ibd_db.py metric-list` and use an existing definition when it matches the same measurement.
+2. If no matching definition exists, explain the needed fields and obtain the user's explicit confirmation of its display name, numeric/qualitative type, and optional default unit. Then create it with `ibd_db.py metric-add` using a stable lowercase `snake_case` code.
+3. Create or locate the one actual `lab` checkup for the source draw, then record the value with `add-result`. Preserve the report's actual unit, reference range, and abnormal flag; a default unit is only a prompt.
+4. Never change a metric's code or value type after it has results. Use `metric-deactivate` to stop new entries while retaining historical results.
+5. Do not invent a metric, unit, reference range, abnormal flag, drug-monitoring need, or medical interpretation from context alone.
 
 ## Symptom baseline workflow
 

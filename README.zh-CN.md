@@ -28,52 +28,6 @@ SQLite 数据库保存病程信息，再通过 AI 提供自然语言记录和查
    数据库中；系统用于记录、整理和描述性回顾，不用于自动诊断、开药或替代
    医生判断。
 
-## 隐私模型
-
-SQLite 数据库是唯一事实来源，默认保存在仓库之外：
-
-```text
-${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}
-```
-
-不要向 Git 提交数据库、附件、导出的报告、真实病历或可识别个人身份的健康信息。
-仓库提供的 `.gitignore` 会拦截常见数据库文件和私有数据目录，但每次提交前仍应
-人工检查待提交内容。
-
-## 环境要求
-
-- Python 3.10 或更高版本
-- Python 标准库中的 SQLite 支持
-- 使用 skill 时需要 OpenClaw；命令行脚本也可以独立运行
-
-不需要安装第三方 Python 包。
-
-仓库发布版本（例如 `v0.1.0`）与 SQLite 数据库 schema 版本（当前为 V6）是两套
-独立编号：前者标识公开发布的代码快照，后者用于保证已有私有数据库能够安全迁移。
-
-## 安装
-
-将仓库克隆到 OpenClaw workspace 的 skills 目录：
-
-```bash
-git clone https://github.com/denniscriss/ibd-companion.git \
-  ~/.openclaw/workspace/skills/ibd-companion
-```
-
-初始化或迁移私有数据库：
-
-```bash
-python3 scripts/ibd_care.py init
-```
-
-如果配置路径下尚不存在数据库，任一 CLI 在首次使用时也会自动创建空的私有数据库。
-
-如需使用其他数据库位置，可为命令设置 `IBD_DB_PATH`：
-
-```bash
-IBD_DB_PATH=/path/to/private/ibd.sqlite3 python3 scripts/ibd_care.py init
-```
-
 ## 快速使用与实践建议
 
 如果配置路径下尚不存在数据库，任一 CLI 在首次使用时都会创建空的私有数据库。
@@ -125,6 +79,52 @@ python3 scripts/ibd_db.py metric-add \
 `qualitative`。默认单位仅用于录入提示；每个实际结果仍保存原始报告中的单位、参考
 范围和异常标记。指标定义不会被删除；如需停止新录入，使用
 `metric-deactivate --code <code>`，历史结果会保留。
+
+## 隐私模型
+
+SQLite 数据库是唯一事实来源，默认保存在仓库之外：
+
+```text
+${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}
+```
+
+不要向 Git 提交数据库、附件、导出的报告、真实病历或可识别个人身份的健康信息。
+仓库提供的 `.gitignore` 会拦截常见数据库文件和私有数据目录，但每次提交前仍应
+人工检查待提交内容。
+
+## 环境要求
+
+- Python 3.10 或更高版本
+- Python 标准库中的 SQLite 支持
+- 使用 skill 时需要 OpenClaw；命令行脚本也可以独立运行
+
+不需要安装第三方 Python 包。
+
+仓库发布版本（例如 `v0.1.0`）与 SQLite 数据库 schema 版本（当前为 V6）是两套
+独立编号：前者标识公开发布的代码快照，后者用于保证已有私有数据库能够安全迁移。
+
+## 安装
+
+将仓库克隆到 OpenClaw workspace 的 skills 目录：
+
+```bash
+git clone https://github.com/denniscriss/ibd-companion.git \
+  ~/.openclaw/workspace/skills/ibd-companion
+```
+
+初始化或迁移私有数据库：
+
+```bash
+python3 scripts/ibd_care.py init
+```
+
+如果配置路径下尚不存在数据库，任一 CLI 在首次使用时也会自动创建空的私有数据库。
+
+如需使用其他数据库位置，可为命令设置 `IBD_DB_PATH`：
+
+```bash
+IBD_DB_PATH=/path/to/private/ibd.sqlite3 python3 scripts/ibd_care.py init
+```
 
 ## 命令概览
 

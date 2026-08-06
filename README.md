@@ -149,14 +149,15 @@ git clone https://github.com/denniscriss/ibd-companion.git \
   ~/.openclaw/workspace/skills/ibd-companion
 ```
 
-Initialize or migrate the private database:
+Initialize or migrate the private database. This is the recommended first step:
 
 ```bash
 python3 scripts/ibd_care.py init
 ```
 
-The database is also created automatically on first use of either CLI if the
-configured path does not exist.
+That creates the current V6 schema for new users and upgrades any earlier
+backup to the same baseline. The database is also created automatically on
+first use of either CLI if the configured path does not yet exist.
 
 To use a different database location, set `IBD_DB_PATH` for the command:
 

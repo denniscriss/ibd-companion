@@ -126,13 +126,14 @@ git clone https://github.com/denniscriss/ibd-companion.git \
   ~/.openclaw/workspace/skills/ibd-companion
 ```
 
-初始化或迁移私有数据库：
+初始化或迁移私有数据库。这是推荐的首选步骤：
 
 ```bash
 python3 scripts/ibd_care.py init
 ```
 
-如果配置路径下尚不存在数据库，任一 CLI 在首次使用时也会自动创建空的私有数据库。
+该命令为新用户创建当前 V6 schema，并将早期备份升级到相同基线。如果配置路径下
+尚不存在数据库，任一 CLI 在首次使用时也会自动创建空的私有数据库。
 
 如需使用其他数据库位置，可为命令设置 `IBD_DB_PATH`：
 

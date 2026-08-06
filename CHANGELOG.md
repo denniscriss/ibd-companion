@@ -2,6 +2,14 @@
 
 All notable changes to IBD Companion are documented here.
 
+## Unreleased
+
+- Prevent the base initializer from lowering a newer care-database schema
+  version and replaying historical migrations.
+- Add a regression test for preserving a V6 care database through base
+  initialization, and document the schema-version policy and private backup
+  workflow.
+
 ## v0.1.1 — 2026-08-06
 
 - Replace drug-specific default metrics with a medicine-agnostic starter panel:

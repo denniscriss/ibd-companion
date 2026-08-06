@@ -113,6 +113,21 @@ or identifying health information. The included `.gitignore` blocks common
 database and private-data paths, but it is not a substitute for reviewing every
 commit.
 
+### Backup and recovery
+
+The database is one private SQLite file. Before an upgrade and at regular
+intervals, make an encrypted or otherwise access-controlled copy outside the
+repository. Avoid copying while another command is writing; a simple local
+example after commands have finished is:
+
+```bash
+cp ~/.openclaw/private/ibd/ibd.sqlite3 ~/PrivateBackups/ibd-YYYY-MM-DD.sqlite3
+```
+
+To recover, keep the backup private and point `IBD_DB_PATH` at that copy, or
+replace the active database only after making a separate safety copy. Never
+attach a real database to an issue, commit, or public release.
+
 ## Requirements
 
 - Python 3.10 or newer

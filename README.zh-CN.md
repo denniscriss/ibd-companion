@@ -93,6 +93,19 @@ ${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}
 仓库提供的 `.gitignore` 会拦截常见数据库文件和私有数据目录，但每次提交前仍应
 人工检查待提交内容。
 
+### 备份与恢复
+
+数据库是一个私有 SQLite 文件。升级前和日常使用中，应定期在仓库外保存受加密或
+访问控制保护的副本。避免在其他命令仍在写入时复制；所有命令结束后，可采用如下
+本地示例：
+
+```bash
+cp ~/.openclaw/private/ibd/ibd.sqlite3 ~/PrivateBackups/ibd-YYYY-MM-DD.sqlite3
+```
+
+恢复时应继续私密保存备份，并通过 `IBD_DB_PATH` 指向该副本；或仅在另行保留安全
+副本后再替换正在使用的数据库。不要将真实数据库附到 issue、提交或公开发布中。
+
 ## 环境要求
 
 - Python 3.10 或更高版本

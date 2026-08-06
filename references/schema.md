@@ -4,6 +4,15 @@ The private single-person SQLite database separates treatment, individual tests,
 large review episodes, clinician-confirmed conclusions, and symptom comparison.
 The same test fact may serve more than one context without being copied.
 
+## Schema-version policy
+
+`PRAGMA user_version` records the database schema version, independently of the
+GitHub release tag. It is monotonic: opening a newer database must never lower
+its version or replay an earlier migration. The base tracker initializes a new
+database at V1; `ibd_care.py` upgrades it additively to V6 while preserving
+existing medical records. Use `ibd_care.py init` as the normal initialization
+and migration entry point.
+
 ## User-facing hierarchy
 
 ```text

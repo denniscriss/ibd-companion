@@ -223,6 +223,7 @@ FACTOR_TERMS = (
 
 def init_db(path: Path = DEFAULT_DB) -> sqlite3.Connection:
     conn = connect(path, create_parent=True)
+    current_version = conn.execute("PRAGMA user_version").fetchone()[0]
     with conn:
         conn.executescript(SCHEMA)
         conn.executemany(
@@ -239,7 +240,10 @@ def init_db(path: Path = DEFAULT_DB) -> sqlite3.Connection:
             "ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at",
             (("timezone", "Asia/Shanghai", stamp), ("summary_interval_days", "7", stamp)),
         )
-        conn.execute("PRAGMA user_version = 1")
+        # The base schema is V1. Never lower a care database's newer version:
+        # doing so would make the care layer replay historical migrations.
+        if current_version < 1:
+            conn.execute("PRAGMA user_version = 1")
     try:
         os.chmod(Path(path).expanduser(), 0o600)
     except OSError:

@@ -10,6 +10,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ibd_care
 import ibd_db
 
 
@@ -59,6 +60,31 @@ class IbdDbTests(unittest.TestCase):
         if os.name != "nt":
             self.assertEqual(path.stat().st_mode & 0o777, 0o600)
             self.assertEqual(path.parent.stat().st_mode & 0o777, 0o700)
+
+    def test_base_init_never_downgrades_a_care_database(self) -> None:
+        care_path = Path(self.tmp.name) / "care.sqlite3"
+        care = ibd_care.open_care_db(care_path)
+        try:
+            ibd_care.set_profile(
+                care,
+                disease_type="Crohn",
+                earliest_symptom_date="2020-01-01",
+                diagnosis_checkup_id=None,
+                notes="keep this profile",
+            )
+            self.assertEqual(care.execute("PRAGMA user_version").fetchone()[0], 6)
+        finally:
+            care.close()
+
+        base = ibd_db.init_db(care_path)
+        try:
+            self.assertEqual(base.execute("PRAGMA user_version").fetchone()[0], 6)
+            profile = base.execute(
+                "SELECT disease_type,notes FROM disease_profile WHERE id='current'"
+            ).fetchone()
+            self.assertEqual(tuple(profile), ("Crohn", "keep this profile"))
+        finally:
+            base.close()
 
     def test_period_analysis_baseline_lags_metrics_and_injections(self) -> None:
         start = date.fromisoformat("2026-07-01")

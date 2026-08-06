@@ -48,6 +48,9 @@ ${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}
 
 不需要安装第三方 Python 包。
 
+仓库发布版本（例如 `v0.1.0`）与 SQLite 数据库 schema 版本（当前为 V6）是两套
+独立编号：前者标识公开发布的代码快照，后者用于保证已有私有数据库能够安全迁移。
+
 ## 安装
 
 将仓库克隆到 OpenClaw workspace 的 skills 目录：
@@ -62,6 +65,8 @@ git clone https://github.com/denniscriss/ibd-companion.git \
 ```bash
 python3 scripts/ibd_care.py init
 ```
+
+如果配置路径下尚不存在数据库，任一 CLI 在首次使用时也会自动创建空的私有数据库。
 
 如需使用其他数据库位置，可为命令设置 `IBD_DB_PATH`：
 

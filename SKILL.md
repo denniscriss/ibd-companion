@@ -1,11 +1,11 @@
 ---
 name: "ibd-companion"
-description: "Unify review naming and require explicit cadence phase boundaries."
+description: "AI-assisted, local-first IBD recordkeeping for Crohn's disease and ulcerative colitis."
 ---
 
 # IBD Companion
 
-Use this skill only for the user's private IBD/Crohn tracking. The SQLite database is the sole source of truth. Keep health data out of Git, MEMORY.md, ordinary notes, Notion, and other channels.
+Use this skill only for the user's private IBD tracking, including Crohn's disease and ulcerative colitis. The SQLite database is the sole source of truth. Keep health data out of Git, MEMORY.md, ordinary notes, Notion, and other channels.
 
 ## Scope and safety
 
@@ -22,6 +22,8 @@ Base tracker: `scripts/ibd_db.py`.
 Care-context extension: `scripts/ibd_care.py`.
 
 Both use `${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}`. Opening through `ibd_care.py` applies migrations through V6, preserving legacy profile snapshots, review parents, and treatment-plan occurrences without copying medical facts.
+
+On first use, either script creates an empty private database at that path if it does not already exist. Creating an empty database does not authorize recording medical facts or creating external reminders.
 
 ## Data model: separate meanings, separate sources
 

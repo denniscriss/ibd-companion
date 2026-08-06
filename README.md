@@ -60,6 +60,10 @@ commit.
 
 No third-party Python packages are required.
 
+Repository releases (for example, `v0.1.0`) and the SQLite schema version
+(currently V6) are separate: the release identifies a published code snapshot,
+while the schema version controls safe migration of an existing private database.
+
 ## Install
 
 Clone the repository into the OpenClaw workspace skills directory:
@@ -74,6 +78,9 @@ Initialize or migrate the private database:
 ```bash
 python3 scripts/ibd_care.py init
 ```
+
+The database is also created automatically on first use of either CLI if the
+configured path does not exist.
 
 To use a different database location, set `IBD_DB_PATH` for the command:
 

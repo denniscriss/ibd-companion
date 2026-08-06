@@ -49,8 +49,12 @@ for provenance and never silently converted into a medical conclusion.
 - `checkup_results`: atomic numeric or qualitative observations such as CRP,
   ESR, HGB, PLT, drug concentration, or antibody. Each value is stored once.
 - `metric_definitions`: explicitly adopted observation types. A new database
-  seeds the six core metrics; additional metrics are added only after explicit
-  adoption. The current infliximab-antibody assay is numeric in `ng/mL`.
+  seeds six medicine-agnostic starter metrics: CRP, ESR, HGB, WBC, PLT, and
+  albumin. Additional metrics, including drug-specific monitoring, are added
+  only after explicit adoption through `metric-add`. Each definition has an
+  immutable code, display name, numeric/qualitative type, optional default
+  unit, and active state; the actual result retains its report-specific unit,
+  reference range, and abnormal flag.
 
 ## Large review episodes
 
@@ -119,7 +123,7 @@ state, not clinician-confirmed disease activity.
 V6 aligns fresh databases and existing databases without rewriting medical
 facts:
 
-1. The core infliximab-antibody metric is numeric in `ng/mL` for databases
+1. A legacy infliximab-antibody metric is numeric in `ng/mL` for databases
    without historical text-valued antibody results. A database containing
    qualitative antibody facts is left unchanged for explicit review.
 2. A review plan occurrence may reuse exactly one matching existing, unlinked

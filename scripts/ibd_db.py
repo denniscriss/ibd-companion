@@ -206,12 +206,9 @@ METRICS = (
     ("crp", "C反应蛋白", "numeric", "mg/L"),
     ("esr", "血沉", "numeric", "mm/h"),
     ("hgb", "血红蛋白", "numeric", "g/L"),
+    ("wbc", "白细胞计数", "numeric", "10^9/L"),
     ("plt", "血小板计数", "numeric", "10^9/L"),
-    ("ifx_level", "英夫利西单抗浓度", "numeric", "μg/mL"),
-    # The current assay is reported quantitatively.  Keep qualitative
-    # historical assays as explicitly adopted metric definitions instead of
-    # silently reinterpreting their recorded values.
-    ("ifx_antibody", "英夫利西单抗抗体", "numeric", "ng/mL"),
+    ("alb", "白蛋白", "numeric", "g/L"),
 )
 
 FACTOR_TERMS = (
@@ -278,6 +275,42 @@ def add_factor_term(conn: sqlite3.Connection, canonical_name: str, category: str
             (identifier, canonical_name, category, json.dumps(aliases, ensure_ascii=False)),
         )
     return identifier
+
+
+def add_metric_definition(
+    conn: sqlite3.Connection, *, code: str, display_name: str,
+    value_type: str, default_unit: str | None = None,
+) -> dict[str, Any]:
+    """Register one explicitly adopted metric without changing existing facts."""
+    if not re.fullmatch(r"[a-z][a-z0-9_]{0,63}", code):
+        raise ValueError("metric code must use lowercase snake_case and start with a letter")
+    display_name = display_name.strip()
+    if not display_name:
+        raise ValueError("metric display_name is required")
+    if value_type not in ("numeric", "qualitative"):
+        raise ValueError("metric value_type must be numeric or qualitative")
+    default_unit = default_unit.strip() if default_unit else None
+    if conn.execute("SELECT 1 FROM metric_definitions WHERE code=?", (code,)).fetchone():
+        raise ValueError("metric code already exists and is immutable")
+    if conn.execute(
+        "SELECT 1 FROM metric_definitions WHERE display_name=?", (display_name,)
+    ).fetchone():
+        raise ValueError("metric display_name already exists")
+    with conn:
+        conn.execute(
+            "INSERT INTO metric_definitions(code,display_name,value_type,default_unit,active) VALUES (?,?,?,?,1)",
+            (code, display_name, value_type, default_unit),
+        )
+    return dict(conn.execute("SELECT * FROM metric_definitions WHERE code=?", (code,)).fetchone())
+
+
+def deactivate_metric_definition(conn: sqlite3.Connection, *, code: str) -> dict[str, Any]:
+    """Stop new entries for a metric while preserving all historical results."""
+    with conn:
+        cursor = conn.execute("UPDATE metric_definitions SET active=0 WHERE code=?", (code,))
+        if cursor.rowcount == 0:
+            raise ValueError("metric not found")
+    return dict(conn.execute("SELECT * FROM metric_definitions WHERE code=?", (code,)).fetchone())
 
 
 def classify_back_to_usual(text: str) -> int | None:
@@ -1039,7 +1072,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser("init")
     sub.add_parser("schema")
-    sub.add_parser("list-metrics")
+    sub.add_parser("list-metrics", aliases=["metric-list"])
+
+    p = sub.add_parser("metric-add")
+    p.add_argument("--code", required=True)
+    p.add_argument("--name", required=True)
+    p.add_argument("--value-type", required=True, choices=("numeric", "qualitative"))
+    p.add_argument("--default-unit")
+
+    p = sub.add_parser("metric-deactivate")
+    p.add_argument("--code", required=True)
 
     p = sub.add_parser("record-symptom")
     p.add_argument("--raw-text", required=True)
@@ -1156,8 +1198,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "schema":
         tables = [row["name"] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
         print_json({"tables": tables, "user_version": conn.execute("PRAGMA user_version").fetchone()[0]})
-    elif args.command == "list-metrics":
+    elif args.command in ("list-metrics", "metric-list"):
         print_json([dict(row) for row in conn.execute("SELECT * FROM metric_definitions WHERE active=1 ORDER BY code")])
+    elif args.command == "metric-add":
+        print_json(add_metric_definition(
+            conn, code=args.code, display_name=args.name,
+            value_type=args.value_type, default_unit=args.default_unit,
+        ))
+    elif args.command == "metric-deactivate":
+        print_json(deactivate_metric_definition(conn, code=args.code))
     elif args.command == "record-symptom":
         back = classify_back_to_usual(args.raw_text) if args.back_to_usual == "auto" else tri(args.back_to_usual)
         identifier = record_symptom(

@@ -97,20 +97,38 @@ IBD_DB_PATH=/path/to/private/ibd.sqlite3 python3 scripts/ibd_care.py init
 
 ### 内置指标
 
-新建数据库默认初始化以下 6 项核心化验或药物监测指标：
+新建数据库默认初始化以下 6 项药物无关的起始指标：
 
 | 指标 | 默认单位 |
 | --- | --- |
 | C 反应蛋白（CRP） | mg/L |
 | 血沉（ESR） | mm/h |
 | 血红蛋白（HGB） | g/L |
+| 白细胞计数（WBC） | 10^9/L |
 | 血小板计数（PLT） | 10^9/L |
-| 英夫利西单抗浓度 | μg/mL |
-| 英夫利西单抗抗体 | ng/mL |
+| 白蛋白 | g/L |
+
+### 添加自定义指标
+
+默认面板刻意保持药物无关。药物浓度、抗体或其他个人需要长期追踪的项目，应先根据
+真实报告或照护计划确认后再添加：
+
+```bash
+python3 scripts/ibd_db.py metric-add \
+  --code infliximab_level \
+  --name "英夫利西单抗浓度" \
+  --value-type numeric \
+  --default-unit "μg/mL"
+```
+
+`code` 应使用稳定的小写 `snake_case`。测量数值选择 `numeric`，文本型结果选择
+`qualitative`。默认单位仅用于录入提示；每个实际结果仍保存原始报告中的单位、参考
+范围和异常标记。指标定义不会被删除；如需停止新录入，使用
+`metric-deactivate --code <code>`，历史结果会保留。
 
 ## 命令概览
 
-基础跟踪脚本负责症状、因素、输注、检查、检查结果和内部提醒记录：
+基础跟踪脚本负责症状、因素、指标定义、输注、检查、检查结果和内部提醒记录：
 
 ```bash
 python3 scripts/ibd_db.py --help
@@ -125,6 +143,9 @@ python3 scripts/ibd_care.py --help
 使用命令前请先阅读 `SKILL.md`。其中规定了安全边界、唯一事实来源和明确确认要求，
 用于防止不同医学含义的数据被混在一起。
 
+有关“原始资料应写入哪里”、检查与大型复查如何关联、以及自定义指标规则，请阅读
+[references/data-entry.zh-CN.md](references/data-entry.zh-CN.md)。
+
 ## 测试
 
 测试只使用临时数据库，不会接触默认的私有数据库：
@@ -138,6 +159,7 @@ python3 -m unittest discover -s scripts -p 'test_ibd_*.py' -v
 ```text
 SKILL.md                 OpenClaw 工作流程与安全规则
 references/schema.md     数据模型与迁移说明
+references/data-entry.zh-CN.md 数据录入流程与自定义指标规则
 scripts/ibd_db.py        基础 SQLite 跟踪脚本和命令行入口
 scripts/ibd_care.py      照护上下文扩展和命令行入口
 scripts/test_ibd_*.py    使用临时数据库的自动化测试

@@ -345,7 +345,8 @@ class IbdCareTests(unittest.TestCase):
 
     def test_v5_antibody_definition_upgrades_only_without_text_results(self) -> None:
         self.conn.execute(
-            "UPDATE metric_definitions SET value_type='qualitative',default_unit=NULL WHERE code='ifx_antibody'"
+            "INSERT INTO metric_definitions(code,display_name,value_type,default_unit) "
+            "VALUES ('ifx_antibody','英夫利西单抗抗体','qualitative',NULL)"
         )
         self.conn.execute('PRAGMA user_version = 5')
         self.conn.commit()

@@ -116,21 +116,41 @@ depends on the agent platform and selected model.
 
 ### Built-in metrics
 
-New databases initialize these six core lab or drug-monitoring metrics:
+New databases initialize these six medicine-agnostic starter metrics:
 
 | Metric | Default unit |
 | --- | --- |
 | C-reactive protein (CRP) | mg/L |
 | Erythrocyte sedimentation rate (ESR) | mm/h |
 | Hemoglobin (HGB) | g/L |
+| White blood cell count (WBC) | 10^9/L |
 | Platelet count (PLT) | 10^9/L |
-| Infliximab level | μg/mL |
-| Infliximab antibody | ng/mL |
+| Albumin | g/L |
+
+### Add your own metrics
+
+The starter list is intentionally medicine-agnostic. Add drug-specific or
+other personally relevant metrics only after confirming them from an actual
+report or care plan:
+
+```bash
+python3 scripts/ibd_db.py metric-add \
+  --code infliximab_level \
+  --name "Infliximab level" \
+  --value-type numeric \
+  --default-unit "μg/mL"
+```
+
+Use a stable lowercase `snake_case` code. Choose `numeric` for a measured
+value and `qualitative` for a text result. The default unit is only a prompt:
+each recorded result keeps the unit, reference range, and abnormal flag shown
+on its source report. Existing metric definitions are never deleted; use
+`metric-deactivate --code <code>` to stop new entries while keeping history.
 
 ## Command overview
 
-The base tracker handles symptoms, factors, injections, checkups, results, and
-internal reminder rows:
+The base tracker handles symptoms, factors, metric definitions, injections,
+checkups, results, and internal reminder rows:
 
 ```bash
 python3 scripts/ibd_db.py --help
@@ -147,6 +167,9 @@ Read `SKILL.md` before using the commands. It contains the safety boundaries,
 source-of-truth rules, and explicit-confirmation requirements that keep unlike
 medical meanings from being mixed together.
 
+For the relational data-entry workflow and rules for mapping facts to tables,
+read [references/data-entry.md](references/data-entry.md).
+
 ## Test
 
 Tests use temporary databases and do not touch the default private database:
@@ -160,6 +183,7 @@ python3 -m unittest discover -s scripts -p 'test_ibd_*.py' -v
 ```text
 SKILL.md                 OpenClaw workflow and safety rules
 references/schema.md     Data-model and migration documentation
+references/data-entry.md Data-entry workflow and custom-metric rules
 scripts/ibd_db.py        Base SQLite tracker and CLI
 scripts/ibd_care.py      Care-context extension and CLI
 scripts/test_ibd_*.py    Automated tests using temporary databases

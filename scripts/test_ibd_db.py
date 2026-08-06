@@ -45,10 +45,14 @@ class IbdDbTests(unittest.TestCase):
             self.assertEqual(
                 conn.execute("SELECT COUNT(*) FROM metric_definitions").fetchone()[0], 6
             )
-            antibody = conn.execute(
-                "SELECT value_type,default_unit FROM metric_definitions WHERE code='ifx_antibody'"
-            ).fetchone()
-            self.assertEqual((antibody['value_type'], antibody['default_unit']), ('numeric', 'ng/mL'))
+            metrics = [tuple(row) for row in conn.execute(
+                "SELECT code,value_type,default_unit FROM metric_definitions ORDER BY code"
+            )]
+            self.assertEqual(metrics, [
+                ('alb', 'numeric', 'g/L'), ('crp', 'numeric', 'mg/L'),
+                ('esr', 'numeric', 'mm/h'), ('hgb', 'numeric', 'g/L'),
+                ('plt', 'numeric', '10^9/L'), ('wbc', 'numeric', '10^9/L'),
+            ])
         finally:
             conn.close()
         self.assertTrue(path.exists())
@@ -178,10 +182,14 @@ class IbdDbTests(unittest.TestCase):
             },
         )
         self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM metric_definitions").fetchone()[0], 6)
-        antibody = self.conn.execute(
-            "SELECT value_type,default_unit FROM metric_definitions WHERE code='ifx_antibody'"
-        ).fetchone()
-        self.assertEqual((antibody['value_type'], antibody['default_unit']), ('numeric', 'ng/mL'))
+        metrics = [tuple(row) for row in self.conn.execute(
+            "SELECT code,value_type,default_unit FROM metric_definitions ORDER BY code"
+        )]
+        self.assertEqual(metrics, [
+            ('alb', 'numeric', 'g/L'), ('crp', 'numeric', 'mg/L'),
+            ('esr', 'numeric', 'mm/h'), ('hgb', 'numeric', 'g/L'),
+            ('plt', 'numeric', '10^9/L'), ('wbc', 'numeric', '10^9/L'),
+        ])
 
     def test_latest_day_total_calibrates_then_later_increments_only(self) -> None:
         d = "2026-07-31"
@@ -301,18 +309,45 @@ class IbdDbTests(unittest.TestCase):
         self.assertIsNone(crp["reference_high"])
         self.assertIsNone(crp["abnormal_flag"])
 
-    def test_quantitative_antibody_result(self) -> None:
+    def test_custom_metric_definition_can_be_added_and_deactivated(self) -> None:
+        metric = ibd_db.add_metric_definition(
+            self.conn, code="infliximab_level", display_name="英夫利西单抗浓度",
+            value_type="numeric", default_unit="μg/mL",
+        )
+        self.assertEqual(metric["code"], "infliximab_level")
         checkup_id = ibd_db.schedule_checkup(
             self.conn, kind="lab", title="药物浓度", due_at="2026-09-15T09:00:00+08:00"
         )
         ibd_db.complete_checkup(self.conn, checkup_id, "2026-09-15T09:00:00+08:00")
         ibd_db.add_result(
-            self.conn, checkup_id=checkup_id, metric_code="ifx_antibody", numeric_value=3.2,
-            unit="ng/mL",
+            self.conn, checkup_id=checkup_id, metric_code="infliximab_level", numeric_value=3.2,
+            unit="μg/mL",
         )
         result = self.conn.execute("SELECT * FROM checkup_results WHERE checkup_id=?", (checkup_id,)).fetchone()
         self.assertEqual(result["numeric_value"], 3.2)
         self.assertIsNone(result["text_value"])
+        inactive = ibd_db.deactivate_metric_definition(self.conn, code="infliximab_level")
+        self.assertEqual(inactive["active"], 0)
+        self.assertEqual(
+            self.conn.execute(
+                "SELECT COUNT(*) FROM checkup_results WHERE metric_code='infliximab_level'"
+            ).fetchone()[0], 1,
+        )
+        with self.assertRaisesRegex(ValueError, "unknown metric"):
+            ibd_db.add_result(
+                self.conn, checkup_id=checkup_id, metric_code="infliximab_level",
+                numeric_value=4.0, unit="μg/mL",
+            )
+
+    def test_custom_metric_definition_rejects_unsafe_or_duplicate_codes(self) -> None:
+        with self.assertRaisesRegex(ValueError, "snake_case"):
+            ibd_db.add_metric_definition(
+                self.conn, code="CRP", display_name="C反应蛋白副本", value_type="numeric",
+            )
+        with self.assertRaisesRegex(ValueError, "already exists"):
+            ibd_db.add_metric_definition(
+                self.conn, code="crp", display_name="另一个 CRP", value_type="numeric",
+            )
 
 
 if __name__ == "__main__":

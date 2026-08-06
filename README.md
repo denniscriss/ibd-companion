@@ -79,9 +79,11 @@ New databases initialize these six medicine-agnostic starter metrics:
 
 ### Add your own metrics
 
-The starter list is intentionally medicine-agnostic. Add drug-specific or
-other personally relevant metrics only after confirming them from an actual
-report or care plan:
+The starter list is intentionally medicine-agnostic. When using an agent,
+you can request a new metric in natural language, for example: “Please add
+infliximab level to my long-term tracking; use a numeric value in μg/mL.” The
+agent should confirm the definition from an actual report or care plan before
+adding it. The equivalent CLI command is:
 
 ```bash
 python3 scripts/ibd_db.py metric-add \

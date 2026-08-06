@@ -158,9 +158,6 @@ python3 scripts/ibd_care.py --help
 使用命令前请先阅读 `SKILL.md`。其中规定了安全边界、唯一事实来源和明确确认要求，
 用于防止不同医学含义的数据被混在一起。
 
-有关“原始资料应写入哪里”、检查与大型复查如何关联、以及自定义指标规则，请阅读
-[references/data-entry.zh-CN.md](references/data-entry.zh-CN.md)。
-
 ## 测试
 
 测试只使用临时数据库，不会接触默认的私有数据库：

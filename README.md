@@ -2,27 +2,41 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-IBD Companion is a local-first OpenClaw skill for privately organizing personal
-IBD/Crohn's disease records. It separates raw observations, treatment events,
-tests, large review episodes, clinician-confirmed assessments, and personal
-symptom baselines in a single SQLite database.
+IBD Companion is an AI-assisted, local-first OpenClaw skill for privately
+organizing personal inflammatory bowel disease (IBD) records, including
+Crohn's disease and ulcerative colitis. It uses AI as a natural-language layer
+over a structured local SQLite database, making it easier to record and query
+the disease history and to prepare clearer information for clinical visits.
 
 It is a recordkeeping and planning aid. It is not a diagnostic, prescribing,
 or emergency-care tool.
 
-## Highlights
+## Core capabilities
 
-- Append-only symptom observations with correction history
-- Daily summaries calculated from raw logs rather than duplicated records
-- Normalized food, sleep, stress, and other possible factors
-- Injection scheduling, rescheduling, completion, and occurrence provenance
-- Individual checkups linked to injections and/or large review episodes
-- Atomic lab results plus versioned narrative reports
-- Versioned, explicitly confirmed clinician assessments
-- Draft, candidate, confirmed, and historical personal symptom baselines
-- Calendar-month review plans with duplicate-safe occurrence generation
-- Optional external reminder integration that stays off by default
-- Additive SQLite migrations through schema V6
+1. **AI-assisted local IBD record.** Organizes the personal disease profile,
+   biologic infusions and their linked lab results, annual or large reviews,
+   and daily symptoms. Users can record or retrieve information through natural
+   conversation instead of manually navigating database tables.
+2. **Low-friction daily logging.** Symptoms and possible factors can be logged
+   on demand, for example what was eaten and what symptoms followed. An
+   optional daily reminder mode is planned; reminder delivery currently
+   requires separate configuration and remains off by default.
+3. **Personal pattern exploration (in progress).** Long-term symptom, food,
+   sleep, stress, and other factor records can support exploratory comparisons
+   of possible personal triggers. These results do not establish medical
+   causality.
+4. **AI-assisted checkup organization and visit preparation.** Keeps lab
+   values, endoscopy, imaging, pathology, source reports, and confirmed
+   clinician conclusions connected to the appropriate infusion or review.
+   This makes the history easier to query and summarize before a clinical
+   conversation.
+5. **Treatment and review planning.** Tracks infusion schedules, changes,
+   completion status, linked monitoring, and annual or other large-review
+   plans without silently changing the treatment cadence.
+6. **Local privacy and medical safety.** Real health data stays in a local
+   SQLite database outside Git. The system supports recording, organization,
+   and descriptive review, but does not diagnose, prescribe, or replace a
+   clinician's judgment.
 
 ## Privacy model
 

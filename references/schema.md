@@ -1,17 +1,8 @@
-# IBD Companion schema — V6
+# IBD Companion schema
 
 The private single-person SQLite database separates treatment, individual tests,
 large review episodes, clinician-confirmed conclusions, and symptom comparison.
 The same test fact may serve more than one context without being copied.
-
-## Schema-version policy
-
-`PRAGMA user_version` records the database schema version, independently of the
-GitHub release tag. It is monotonic: opening a newer database must never lower
-its version or replay an earlier migration. The base tracker initializes a new
-database at V1; `ibd_care.py` upgrades it additively to V6 while preserving
-existing medical records. Use `ibd_care.py init` as the normal initialization
-and migration entry point.
 
 ## User-facing hierarchy
 
@@ -42,11 +33,6 @@ optional diagnosis-checkup link, and sparse timeless notes. Current disease
 status, affected locations, treatment state, symptom-baseline content, and dated
 medical events do not belong here. Procedures, admissions, complications, and
 other dated facts remain in their dated medical records.
-
-### `disease_profile_legacy_snapshots`
-
-Immutable V2 migration snapshots. Legacy status/location/date fields are kept
-for provenance and never silently converted into a medical conclusion.
 
 ## Treatment and routine monitoring
 
@@ -126,38 +112,6 @@ temperature. Stool total remains the latest active `day_total` plus only later
 
 Only explicit confirmation enables a symptom baseline. It is personal usual
 state, not clinician-confirmed disease activity.
-
-## V5 → V6 consistency migration
-
-V6 aligns fresh databases and existing databases without rewriting medical
-facts:
-
-1. A legacy infliximab-antibody metric is numeric in `ng/mL` for databases
-   without historical text-valued antibody results. A database containing
-   qualitative antibody facts is left unchanged for explicit review.
-2. A review plan occurrence may reuse exactly one matching existing, unlinked
-   review instead of creating a duplicate. Ambiguous matches stop for explicit
-   resolution.
-3. One review episode can belong to at most one review-plan occurrence.
-
-## V4 → V5 plan naming migration
-
-The obsolete empty `followup_plans` layer is removed. Injection occurrence
-provenance moves from generic `plan_occurrences` to
-`treatment_plan_occurrences`. A database containing non-empty legacy follow-up
-plans stops for explicit review instead of guessing how to reinterpret them.
-
-## V3 → V4 migration
-
-The migration is additive and runs once when opening a pre-V4 database:
-
-1. The linked diagnosis checkup gains a `review_episodes` parent and a
-   `diagnostic_workup` component link.
-2. Explicit legacy rows whose titles contain `复查` gain a review parent; a lab
-   row is linked as the lab component.
-3. Existing injections, checkups, results, assessments, notes, and timestamps
-   are not copied, renamed, or deleted.
-4. Future V4 child tests are never title-scanned again after `user_version=4`.
 
 ## Summaries
 

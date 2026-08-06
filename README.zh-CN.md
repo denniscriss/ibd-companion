@@ -114,8 +114,8 @@ cp ~/.openclaw/private/ibd/ibd.sqlite3 ~/PrivateBackups/ibd-YYYY-MM-DD.sqlite3
 
 不需要安装第三方 Python 包。
 
-仓库发布版本（例如 `v0.1.0`）与 SQLite 数据库 schema 版本（当前为 V6）是两套
-独立编号：前者标识公开发布的代码快照，后者用于保证已有私有数据库能够安全迁移。
+仓库发布版本（例如 `v0.1.0`）标识公开发布的代码快照；私有数据库始终按当前
+schema 初始化和维护。
 
 ## 安装
 
@@ -132,8 +132,8 @@ git clone https://github.com/denniscriss/ibd-companion.git \
 python3 scripts/ibd_care.py init
 ```
 
-该命令为新用户创建当前 V6 schema，并将早期备份升级到相同基线。如果配置路径下
-尚不存在数据库，任一 CLI 在首次使用时也会自动创建空的私有数据库。
+该命令为新用户创建当前的私有数据库结构。如果配置路径下尚不存在数据库，任一 CLI
+在首次使用时也会自动创建空的私有数据库。
 
 如需使用其他数据库位置，可为命令设置 `IBD_DB_PATH`：
 

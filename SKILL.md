@@ -21,7 +21,7 @@ Base tracker: `scripts/ibd_db.py`.
 
 Care-context extension: `scripts/ibd_care.py`.
 
-Both use `${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}`. Opening through `ibd_care.py` applies migrations through V6, preserving legacy profile snapshots, review parents, and treatment-plan occurrences without copying medical facts.
+Both use `${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.sqlite3}`. Opening through `ibd_care.py` ensures the current private database structure is available without copying medical facts.
 
 On first use, either script creates an empty private database at that path if it does not already exist. Creating an empty database does not authorize recording medical facts or creating external reminders.
 
@@ -40,7 +40,7 @@ On first use, either script creates an empty private database at that path if it
 - Use `ibd_care.py set-profile` only for disease type, earliest symptom date, diagnosis-checkup link, and small timeless notes. A dated procedure, admission, complication, symptom episode, or clinician conclusion must be recorded in its dated medical record and must not be duplicated in profile notes.
 - Do not add a current-baseline field or copy baseline values into the profile. `current-summary` resolves the unique explicitly confirmed row from `symptom_baselines` dynamically.
 - Create or retain the diagnosis as a completed `checkups` record first, then link it with `--diagnosis-checkup-id`.
-- Do not create a diagnosis event from an old standalone date unless the user explicitly confirms the factual details. The V2→V3 migration preserves legacy profile fields in `disease_profile_legacy_snapshots` instead.
+- Do not create a diagnosis event from an old standalone date unless the user explicitly confirms the factual details.
 
 ## Injection monitoring, review components, reports, and conclusions
 

@@ -136,9 +136,8 @@ attach a real database to an issue, commit, or public release.
 
 No third-party Python packages are required.
 
-Repository releases (for example, `v0.1.0`) and the SQLite schema version
-(currently V6) are separate: the release identifies a published code snapshot,
-while the schema version controls safe migration of an existing private database.
+Repository releases (for example, `v0.1.0`) identify published code snapshots.
+The private database is initialized and maintained with the current schema.
 
 ## Install
 
@@ -155,9 +154,9 @@ Initialize or migrate the private database. This is the recommended first step:
 python3 scripts/ibd_care.py init
 ```
 
-That creates the current V6 schema for new users and upgrades any earlier
-backup to the same baseline. The database is also created automatically on
-first use of either CLI if the configured path does not yet exist.
+That creates the current private database structure. The database is also
+created automatically on first use of either CLI if the configured path does
+not yet exist.
 
 To use a different database location, set `IBD_DB_PATH` for the command:
 

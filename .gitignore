@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+.env
+.env.*
+.DS_Store
+
+# Health data and local database artifacts must never enter Git.
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+attachments/
+data/
+exports/
+private/
+reports/

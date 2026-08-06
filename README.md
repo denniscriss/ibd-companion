@@ -1,5 +1,7 @@
 # IBD Companion
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 IBD Companion is a local-first OpenClaw skill for privately organizing personal
 IBD/Crohn's disease records. It separates raw observations, treatment events,
 tests, large review episodes, clinician-confirmed assessments, and personal

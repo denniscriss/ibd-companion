@@ -88,6 +88,45 @@ To use a different database location, set `IBD_DB_PATH` for the command:
 IBD_DB_PATH=/path/to/private/ibd.sqlite3 python3 scripts/ibd_care.py init
 ```
 
+## Quick start and practical use
+
+On first use, either CLI creates an empty private database if the configured
+path does not yet exist. When using OpenClaw, record or retrieve information in
+natural language instead of navigating database tables directly. For example:
+
+- “Record two bowel movements today, soft-formed stool, pain score 1, usual for me.”
+- “I drank coffee today and felt bloated in the evening.”
+- “When is my next infusion?”
+- “Summarize my symptoms, infusions, and checkups from the last 30 days.”
+
+External reminder delivery is optional and off by default. It must be
+explicitly configured before it can send notifications.
+
+### Recording from photos and reports
+
+For report intake, a multimodal model with image and PDF understanding is
+recommended. It can help read a lab report, endoscopy report, imaging report,
+or discharge summary and prepare structured values for this local database.
+
+Before saving, verify extracted values against the source report, including the
+unit, report-specific reference range, and abnormal flag. Preserve source
+wording for narrative findings, and leave uncertain information empty. The
+included Python scripts do not perform OCR themselves; image/PDF understanding
+depends on the agent platform and selected model.
+
+### Built-in metrics
+
+New databases initialize these six core lab or drug-monitoring metrics:
+
+| Metric | Default unit |
+| --- | --- |
+| C-reactive protein (CRP) | mg/L |
+| Erythrocyte sedimentation rate (ESR) | mm/h |
+| Hemoglobin (HGB) | g/L |
+| Platelet count (PLT) | 10^9/L |
+| Infliximab level | μg/mL |
+| Infliximab antibody | ng/mL |
+
 ## Command overview
 
 The base tracker handles symptoms, factors, injections, checkups, results, and

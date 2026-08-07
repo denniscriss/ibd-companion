@@ -25,6 +25,21 @@ Both use `${IBD_DB_PATH:-${OPENCLAW_STATE_DIR:-$HOME/.openclaw}/private/ibd/ibd.
 
 On first use, either script creates an empty private database at that path if it does not already exist. Creating an empty database does not authorize recording medical facts or creating external reminders.
 
+## First-use onboarding
+
+When a user first asks to start or set up IBD tracking, run `ibd_care.py overview` to inspect the private database. If profile, treatment plan, review plan, confirmed baseline, and symptom logs are all absent, offer an optional stepwise setup; do not require every step.
+
+Offer one item at a time, always allowing **fill now / skip for now / return later**:
+
+1. **Disease profile:** disease type, earliest symptom date, optional diagnosis-checkup link, and sparse timeless notes only.
+2. **Treatment plan:** only an explicitly confirmed clinician plan—treatment name, dose note, interval, and first planned date. Explain that actual infusions are separate `injections` records.
+3. **Large-review plan:** only an explicitly confirmed clinician arrangement—title, calendar-month interval, first due date, and optional bounded end date. Explain that actual reviews and their component tests are separate records, and do not invent components.
+4. **Personal symptom baseline:** the user's relative usual state—stool total, pain, bloating, blood, urgency, night stool, and optional note. Create a draft, show it, and require explicit confirmation before enabling it. It is not a clinical activity/remission assessment.
+5. **Daily logging:** offer to begin recording from today without requiring historical reconstruction.
+6. **External reminders:** explain that delivery is disabled by default and needs separate explicit approval.
+
+If only some setup elements are absent, offer only those. If the user only asks to record a symptom, checkup, infusion, or report, complete that request without forcing onboarding; mention missing setup only afterwards when relevant. Never infer a treatment schedule, review cadence, diagnosis date, baseline, affected location, or clinician conclusion from historical records. At the end of setup, use `current-summary` or `overview` to show configured and still-optional areas.
+
 ## Data model: separate meanings, separate sources
 
 1. **Thin disease profile — durable global context only.** `disease_profile` stores confirmed disease type, earliest symptom date, an optional link to the actual diagnosis `checkups` record, and sparse timeless notes. It does not store current status, affected locations, a standalone diagnosis date, treatment state, symptom-baseline content, or dated medical events. Procedures, admissions, complications, and other dated facts belong in `checkups`/review history.

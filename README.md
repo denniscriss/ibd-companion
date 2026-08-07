@@ -52,6 +52,21 @@ natural language instead of navigating database tables directly. For example:
 External reminder delivery is optional and off by default. It must be
 explicitly configured before it can send notifications.
 
+## First-time setup (optional)
+
+A new user may begin daily logging immediately, or set up information gradually:
+
+1. stable disease profile;
+2. current clinician-confirmed treatment plan;
+3. clinician-confirmed large-review plan;
+4. personal usual-state symptom baseline; and
+5. optional external reminders.
+
+Every step may be skipped and completed later. The disease profile contains only
+stable disease context; treatment and review schedules are separate plans, and
+must come from an explicitly confirmed clinician arrangement. The agent should
+ask for one item at a time and must not infer missing schedules or medical facts.
+
 ### Recording from photos and reports
 
 For report intake, a multimodal model with image and PDF understanding is

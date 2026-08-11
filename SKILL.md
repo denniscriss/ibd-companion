@@ -1,6 +1,6 @@
 ---
 name: "ibd-companion"
-description: "AI-assisted, local-first IBD recordkeeping for Crohn's disease and ulcerative colitis."
+description: "AI-assisted, local-first IBD recordkeeping and guided symptom logging for Crohn's disease and ulcerative colitis."
 ---
 
 # IBD Companion
@@ -99,6 +99,18 @@ If only some setup elements are absent, offer only those. If the user only asks 
 ## Daily symptoms and factors
 
 Continue using `ibd_db.py record-symptom`, `daily-summary`, `factor-term-add`, and `record-factor`.
+
+### Guided symptom-recording interaction
+
+- Treat explicit wording such as “IBD记录”, “记录症状”, “记进IBD”, or an equivalent clear request as authorization to start the symptom-recording workflow. If the user only describes how they feel without asking to record it, do not write to the database; ask whether they want it recorded.
+- The default workflow is **parse draft → ask once → show confirmation draft → record only after explicit confirmation**. Preserve the user's original wording in `raw_text` from the start, but do not call `record-symptom` before confirmation.
+- The follow-up must cover both:
+  1. **Ambiguities that affect meaning**, especially observation date/time and whether a stool count is the cumulative `day_total` or a newly added `increment`.
+  2. **Important observations the user did not mention**, even when the original description is otherwise recordable. Proactively prompt for the relevant core items: stool count and state, pain score, blood, urgency, night stool, and overall comparison with usual. Ask context-sensitive items only when relevant, such as pain location, mucus, bloating, temperature, vomiting, hydration difficulty, or perianal symptoms.
+- Bundle the necessary questions into one concise follow-up rather than conducting a long field-by-field interview. The user may answer “不知道”, “未观察”, or “跳过”; retain those fields as NULL and never infer a negative answer from silence.
+- Before writing, show a short structured draft that distinguishes supplied values from “未提供”, and ask for confirmation or corrections. After confirmation, write once and return a concise record summary.
+- If the user explicitly says “IBD直接记录” or an equivalent skip-confirmation instruction, the confirmation draft may be skipped. Still resolve any ambiguity that could produce an incorrect date, stool-count mode, or duplicate count before writing.
+- For red-flag symptoms, urgent-care guidance takes precedence over routine questioning. Recording remains a separate action and still requires the user's recording intent.
 
 - Classify stool count as `day_total` only when cumulative as of the observation, or `increment` only when newly added after prior entries. Ask when ambiguous.
 - Daily aggregation uses the latest active day total then only later increments. Superseded entries are excluded.

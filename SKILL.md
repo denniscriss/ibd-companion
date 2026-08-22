@@ -1,6 +1,6 @@
 ---
 name: "ibd-companion"
-description: "AI-assisted, local-first IBD recordkeeping and guided symptom logging for Crohn's disease and ulcerative colitis."
+description: "Private IBD records, lightweight symptom-and-diet logging, plans, reviews, and trends."
 ---
 
 # IBD Companion
@@ -100,15 +100,30 @@ If only some setup elements are absent, offer only those. If the user only asks 
 
 Continue using `ibd_db.py record-symptom`, `daily-summary`, `factor-term-add`, and `record-factor`.
 
-### Guided symptom-recording interaction
+### Lightweight combined symptom-and-diet mode
+
+Treat the default daily IBD record as one lightweight interaction covering both symptoms and diet. Keep symptoms as the main clinical fields, retain an optional one-sentence account of what the user ate, and use structured food factors only when useful for comparison.
+
+- Alongside symptom questions, ask one compact prompt: **饮食一句话：今天大概吃了什么？也可以答“饮食如常 / 未观察 / 跳过”**.
+- Accept a plain sentence such as “中午面条，晚上米饭和炒菜” without asking the user to classify it as usual or unusual. Preserve that sentence in the symptom record's `raw_text`, even when the food was ordinary.
+- If the user says “饮食如常”, preserve that explicit wording in `raw_text`; do not create a food-factor exposure merely to represent normal eating.
+- Keep the diet description lightweight. Ask approximate time, rough amount, or difference from usual only when needed to clarify the record or when the user wants to track a possible pattern. Do not require calories, nutrients, full ingredients, condiments, or precise weights.
+- Create structured food-factor rows selectively: when the user explicitly wants to track an item or confirms a potentially useful exposure such as unusually spicy food, milk, coffee, alcohol, a new food, an unusually large meal, or skipped meals. Do not turn every ordinary food in the one-sentence summary into a factor row.
+- Resolve each structured dietary exposure through a canonical `factor_terms(category='food')` term, keep the user's wording in `raw_label`, and put meal context in `detail`. Add a new canonical term only through the existing explicit-confirmation workflow.
+- Set `suspected` only when the user explicitly says they suspect an association. Never infer causality from timing.
+- Do not treat absence of a diet sentence or food factor as “饮食如常”. If diet was not answered, leave it unrecorded.
+- Show symptoms and diet in one confirmation draft, then write the symptom log once and any confirmed food-factor rows after the user confirms. The user may record symptoms without diet or diet without symptoms; a diet-only ordinary entry stays in `raw_text` rather than being forced into a factor row.
+
+### Guided combined daily-recording interaction
 
 - Treat explicit wording such as “IBD记录”, “记录症状”, “记进IBD”, or an equivalent clear request as authorization to start the symptom-recording workflow. If the user only describes how they feel without asking to record it, do not write to the database; ask whether they want it recorded.
 - The default workflow is **parse draft → ask once → show confirmation draft → record only after explicit confirmation**. Preserve the user's original wording in `raw_text` from the start, but do not call `record-symptom` before confirmation.
-- The follow-up must cover both:
+- The follow-up must cover:
   1. **Ambiguities that affect meaning**, especially observation date/time and whether a stool count is the cumulative `day_total` or a newly added `increment`.
-  2. **Important observations the user did not mention**, even when the original description is otherwise recordable. Proactively prompt for the relevant core items: stool count and state, pain score, blood, urgency, night stool, and overall comparison with usual. Ask context-sensitive items only when relevant, such as pain location, mucus, bloating, temperature, vomiting, hydration difficulty, or perianal symptoms.
+  2. **Important symptom observations the user did not mention**, even when the original description is otherwise recordable. Proactively prompt for the relevant core items: stool count and state, pain score, blood, urgency, night stool, and overall comparison with usual. Ask context-sensitive items only when relevant, such as pain location, mucus, bloating, temperature, vomiting, hydration difficulty, or perianal symptoms.
+  3. **The lightweight diet check**, inviting a one-sentence account of what was eaten, while allowing “饮食如常”, “未观察”, or “跳过”; ask for extra detail only when clarification or optional factor tracking makes it useful.
 - Bundle the necessary questions into one concise follow-up rather than conducting a long field-by-field interview. The user may answer “不知道”, “未观察”, or “跳过”; retain those fields as NULL and never infer a negative answer from silence.
-- Before writing, show a short structured draft that distinguishes supplied values from “未提供”, and ask for confirmation or corrections. After confirmation, write once and return a concise record summary.
+- Before writing, show one short structured draft with separate **症状** and **饮食** sections, distinguishing supplied values from “未提供”, and ask for confirmation or corrections. After confirmation, write once and return one concise combined record summary.
 - If the user explicitly says “IBD直接记录” or an equivalent skip-confirmation instruction, the confirmation draft may be skipped. Still resolve any ambiguity that could produce an incorrect date, stool-count mode, or duplicate count before writing.
 - For red-flag symptoms, urgent-care guidance takes precedence over routine questioning. Recording remains a separate action and still requires the user's recording intent.
 
